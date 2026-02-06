@@ -1,0 +1,38 @@
+I'll build an offline bundle now: copy the built fat JAR, create run scripts and config templates, and zip everything into enterprise-app-offline.zip you can transfer behind the firewall. I'll run commands to create the bundle and show next steps.
+
+Now I'll create an offline package directory, copy the fat jar and required resources (application.yml, README, sql, static, scripts), include a start script and instruction file, then zip it.
+
+I created an offline bundle you can copy behind your firewall.
+
+What I packaged
+
+A runnable fat JAR:
+enterprise-app-0.0.1-SNAPSHOT.jar
+Project resources needed at runtime:
+resources/ (copy of src/main/resources: application.yml, templates, sql, static, etc.)
+Docs:
+README.md
+ProjectDetails.md
+Run helper:
+bin/run.sh (executable wrapper that sets SPRING_CONFIG_LOCATION to application.yml and runs the JAR)
+Bundle location (on your machine)
+
+enterprise-app-offline.zip
+How to use the bundle behind the firewall
+
+Transfer enterprise-app-offline.zip to the internal host (scp, USB, whatever your process is).
+On the internal host, unzip:
+Edit the configuration:
+Edit application.yml to set your internal Oracle datasource, Azure AD may be unused inside firewall; either configure SSO to internal IdP or disable oauth for internal runs.
+Run the app:
+The script sets SPRING_CONFIG_LOCATION to the bundled application.yml. You can set environment variables (APP_ENC_KEY_BASE64, ISD_SHARED_KEY) before running, or supply JVM options via JAVA_OPTS.
+Notes and follow-ups
+
+All dependencies are contained in the fat JAR produced by Maven, so no external internet access is needed at runtime.
+If you need to build on the internal host (not just run), you must also transfer the Maven repo or pre-resolve dependencies (I can produce a maven-offline bundle / local .m2 mirror if required).
+If you want a Docker image for air-gapped registries, I can produce a Dockerfile and build the image locally, then export docker save into a tar you can import behind the firewall.
+I can also add a small systemd service unit or supervisord script for production runs.
+Would you like:
+
+A docker image tar (docker save) I can produce locally for you to import inside the firewall?
+A .m2 offline mirror archive (if you need to build internally)?
